@@ -22,9 +22,15 @@ namespace sweetie_rush {
       SDL_Quit();
    }
 
-   void sdl::construct_singleton()
+   sdl const & sdl::initialize()
    {
       static auto && singleton = sdl();
+      return singleton;
+   }
+
+   namespace {
+      // initializes the SDL framework before main() is called
+      sdl const & sdl_singleton = sdl::initialize();
    }
 
 }

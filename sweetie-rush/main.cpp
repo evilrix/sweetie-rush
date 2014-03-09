@@ -9,42 +9,16 @@
 
 #include <ctime>
 #include <iostream>
-#include <thread>
 
 #include <Windows.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
-#include "sdl.hpp"
-#include "board.hpp"
-#include "error.hpp"
+#include "game.hpp"
 
 namespace sweetie_rush {
 
    void main()
    {
-      sdl::construct_singleton();
-      board brd;
-
-      auto && e = SDL_Event();
-      auto quit = false;
-
-      while (!quit)
-      {
-         while (SDL_PollEvent(&e))
-         {
-            if (e.type == SDL_QUIT)
-            {
-               quit = true;
-            }
-
-            if (e.type == SDL_MOUSEBUTTONDOWN)
-            {
-               brd.on_mouse_click();
-            }
-         }
-      }
+      game().run();
    }
 }
 

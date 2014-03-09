@@ -100,6 +100,7 @@ copy "$(SolutionDir)assets\*.png" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="board.cpp" />
+    <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="sdl.cpp" />
@@ -112,6 +113,7 @@ copy "$(SolutionDir)assets\*.png" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="board.hpp" />
     <ClInclude Include="error.hpp" />
+    <ClInclude Include="game.hpp" />
     <ClInclude Include="renderer.hpp" />
     <ClInclude Include="sdl.hpp" />
     <ClInclude Include="sdl_base.hpp" />

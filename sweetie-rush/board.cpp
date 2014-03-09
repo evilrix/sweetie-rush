@@ -7,6 +7,8 @@
   *
   */
 
+#include <cmath>
+#include <utility>
 #include <algorithm>
 #include <memory>
 #include <vector>
@@ -136,21 +138,70 @@ namespace sweetie_rush {
       SDL_RenderPresent(ren_.get());
    }
 
-   void board::on_mouse_click()
+   void board::on_mouse_click(SDL_Event const & e)
    {
-      auto this_click = coords {};
-      auto z = SDL_GetMouseState(&this_click.x, &this_click.y);
-
-      if(z & SDL_BUTTON_LEFT)
+      if(e.button.button & SDL_BUTTON_LEFT)
       {
-         this_click.x /= tile_size;
-         this_click.y /= tile_size;
-
-         tiles_[last_click_.x][last_click_.y].selected(false);
-         tiles_[this_click.x][this_click.y].selected(true);
-
-         last_click_ = this_click;
-         render();
+         move_tile(e.button.x, e.button.y);
       }
+   }
+
+   void board::on_mouse_motion(SDL_Event const & e)
+   {
+      if(e.motion.state & SDL_BUTTON_LEFT)
+      {
+         move_tile(e.motion.x, e.motion.y);
+      }
+   }
+
+   void board::move_tile(int x, int y)
+   {
+      auto this_click = coords {x, y};
+
+      // get the position down to tile granularity
+      this_click.x /= tile_size;
+      this_click.y /= tile_size;
+
+      // Toggle select on this tile...
+      auto & this_tile = tiles_[this_click.x][this_click.y];
+      this_tile.toggle_selected();
+
+      if(this_tile.is_selected())
+      {
+         // if this click differs from the last...
+         if(this_click.x != last_click_.x || this_click.y != last_click_.y)
+         {
+            // if we've perviously clicked a tile...
+            if(last_click_.x >= 0 && last_click_.y >= 0)
+            {
+               auto & last_tile = tiles_[last_click_.x][last_click_.y];
+
+               // get the x/y axis difference between this and last
+               auto const x_diff = abs(this_click.x-last_click_.x);
+               auto const y_diff = abs(this_click.y-last_click_.y);
+
+               // if this tile is adjacent vertically or horizontally
+               if((1 == x_diff && 1 != y_diff) ||
+                  (1 != x_diff && 1 == y_diff))
+               {
+                  // swap the tiles
+                  last_tile.swap(this_tile);
+               }
+
+               // look for any three-in-a-line match
+
+               // unselect the previous time
+               last_tile.selected(false);
+            }
+
+            last_click_ = this_click;
+         }
+      }
+      else
+      {
+         last_click_ = coords {-1, -1};
+      }
+
+      render();
    }
 }

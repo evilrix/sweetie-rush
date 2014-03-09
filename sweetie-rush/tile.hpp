@@ -67,11 +67,37 @@ namespace sweetie_rush {
           * @param [in,out] rhs The right hand side.
           */
 
-         static
-         void swap(tile & lhs, tile & rhs);
+         static void swap(tile & lhs, tile & rhs);
 
-      public:
+         /**
+          * @brief Swaps the given right hand side.
+          *
+          * @param [in,out] rhs The right hand side.
+          */
+
+         void swap(tile & rhs);
+
+         /**
+          * @brief Selected the given selected.
+          *
+          * @param selected (Optional) the selected.
+          */
+
          void selected(bool const selected = true);
+
+         /**
+          * @brief Toggle selected.
+          */
+
+         void toggle_selected();
+
+         /**
+          * @brief Query if this tile is selected.
+          *
+          * @return true if selected, false if not.
+          */
+
+         bool is_selected() const { return selected_; }
 
       private:
          void render_copy() const;

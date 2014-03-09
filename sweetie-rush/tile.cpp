@@ -8,6 +8,7 @@
   */
 
 #include <algorithm>
+#include <utility>
 
 #include "sdl_error.hpp"
 #include "tile.hpp"
@@ -33,11 +34,16 @@ namespace sweetie_rush {
       return swt_;
    }
 
+   void tile::swap(tile & rhs)
+   {
+      std::swap(swt_, rhs.swt_);
+      render_copy();
+      rhs.render_copy();
+   }
+
    void tile::swap(tile & lhs, tile & rhs)
    {
-      std::swap(lhs.swt_, rhs.swt_);
-      lhs.render_copy();
-      rhs.render_copy();
+      lhs.swt_.swap(rhs.swt_);
    }
 
    void tile::render_copy() const
@@ -66,5 +72,10 @@ namespace sweetie_rush {
          selected_ = selected;
          render_copy();
       }
+   }
+
+   void tile::toggle_selected()
+   {
+      selected(!selected_);
    }
 }

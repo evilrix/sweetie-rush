@@ -58,7 +58,16 @@ namespace sweetie_rush {
           * @brief Handles mouse click signals.
           */
 
-         void on_mouse_click();
+         void on_mouse_click(SDL_Event const & e);
+
+         /**
+          * @brief Handles mouse motion signals.
+          */
+
+         void on_mouse_motion(SDL_Event const & e);
+
+      private:
+         void move_tile(int x, int y);
 
       private:
          static int const tile_size = tile::dim;
@@ -73,7 +82,7 @@ namespace sweetie_rush {
          window win_;
          renderer ren_;
          types_t tiles_;
-         coords last_click_ = coords {};
+         coords last_click_ = coords {-1, -1};
    };
 
 }

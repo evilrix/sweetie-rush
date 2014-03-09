@@ -14,7 +14,7 @@
 namespace sweetie_rush {
 
    /**
-    * @brief A sdl.
+    * @brief Meyers' Singleton class used to initialise the SDL.
     */
 
    class sdl
@@ -25,7 +25,7 @@ namespace sweetie_rush {
           * @brief Construct singleton.
           */
 
-         static void construct_singleton();
+         static sdl const & initialize();
 
       private:
          sdl();
