@@ -14,6 +14,7 @@
 
 #include "window.hpp"
 #include "renderer.hpp"
+#include "tile.hpp"
 
 namespace sweetie_rush {
 
@@ -55,13 +56,12 @@ namespace sweetie_rush {
          void on_mouse_click();
 
       private:
-         static int const tile_size = 36;
+         static int const tile_size = tile::dim;
          static int const board_dim = 8;
          static int const board_siz = tile_size * board_dim;
 
       private:
-         using types_t = std::array<std::array<
-                         std::shared_ptr<texture>, board_dim>, board_dim>;
+         using types_t = std::array<std::array<tile, board_dim>, board_dim>;
 
       private:
          window win_;

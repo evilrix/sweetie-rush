@@ -13,32 +13,32 @@
 namespace sweetie_rush {
 
    template <>
-   sweetie<sweetie_enum::blue>::sweetie(renderer const & ren)
-      : texture(ren, surface("blue.png"))
+   sweetie_<sweetie_enum::blue>::sweetie_(renderer const & ren)
+      : sweetie(ren, surface("blue.png"))
    {
    }
 
    template <>
-   sweetie<sweetie_enum::green>::sweetie(renderer const & ren)
-      : texture(ren, surface("green.png"))
+   sweetie_<sweetie_enum::green>::sweetie_(renderer const & ren)
+      : sweetie(ren, surface("green.png"))
    {
    }
 
    template <>
-   sweetie<sweetie_enum::purple>::sweetie(renderer const & ren)
-      : texture(ren, surface("purple.png"))
+   sweetie_<sweetie_enum::purple>::sweetie_(renderer const & ren)
+      : sweetie(ren, surface("purple.png"))
    {
    }
 
    template <>
-   sweetie<sweetie_enum::red>::sweetie(renderer const & ren)
-      : texture(ren, surface("red.png"))
+   sweetie_<sweetie_enum::red>::sweetie_(renderer const & ren)
+      : sweetie(ren, surface("red.png"))
    {
    }
 
    template <>
-   sweetie<sweetie_enum::yellow>::sweetie(renderer const & ren)
-      : texture(ren, surface("yellow.png"))
+   sweetie_<sweetie_enum::yellow>::sweetie_(renderer const & ren)
+      : sweetie(ren, surface("yellow.png"))
    {
    }
 }

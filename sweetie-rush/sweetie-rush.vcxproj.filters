@@ -56,6 +56,9 @@
     <ClCompile Include="sweetie.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="surface.hpp">
@@ -83,6 +86,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sweetie.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

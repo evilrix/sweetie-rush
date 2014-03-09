@@ -27,6 +27,32 @@ namespace sweetie_rush {
       yellow
    };
 
+   class sweetie : public texture
+   {
+      public:
+
+         /**
+          * @brief Initializes a new instance of the sweetie class.
+          *
+          * @param ren The ren.
+          */
+
+         sweetie(renderer const & ren, surface const & sur)
+            : texture(ren, sur)
+         {
+         }
+
+      public:
+
+         /**
+          * @brief Gets the tag.
+          *
+          * @return A sweetie_enum.
+          */
+
+         virtual sweetie_enum tag() const = 0;
+   };
+
    /**
     * @brief A sweetie.
     *
@@ -34,23 +60,37 @@ namespace sweetie_rush {
     */
 
    template<sweetie_enum swen>
-   class sweetie : public texture
+   class sweetie_ : public sweetie
    {
       public:
-         static const sweetie_enum tag = swen;  ///< The tag
+
+         /**
+          * @brief Initializes a new instance of the sweetie class.
+          *
+          * @param ren The ren.
+          */
+
+         sweetie_(renderer const & ren);
 
       public:
-         sweetie(renderer const & ren);
+
+         /**
+          * @brief Gets the tag.
+          *
+          * @return A sweetie_enum.
+          */
+
+         sweetie_enum tag() const override { return swen; }
    };
 
    /**
      * @brief Types of sweetie.
      */
 
-   using sweetie_blue = sweetie<sweetie_enum::blue>;
-   using sweetie_green = sweetie<sweetie_enum::green>;
-   using sweetie_purple = sweetie<sweetie_enum::purple>;
-   using sweetie_red = sweetie<sweetie_enum::red>;
-   using sweetie_yellow = sweetie<sweetie_enum::yellow>;
+   using sweetie_blue = sweetie_<sweetie_enum::blue>;
+   using sweetie_green = sweetie_<sweetie_enum::green>;
+   using sweetie_purple = sweetie_<sweetie_enum::purple>;
+   using sweetie_red = sweetie_<sweetie_enum::red>;
+   using sweetie_yellow = sweetie_<sweetie_enum::yellow>;
 
 }

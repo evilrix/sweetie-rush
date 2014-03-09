@@ -48,18 +48,18 @@ namespace sweetie_rush {
       // also when the weak pointer goes out of scope. This has been fixed by
       // Microsoft but the patch has yet to be released. In the mean time it's
       // necessary to construct a vector the old fashioned way =/
-      auto && textures = std::vector<std::shared_ptr<texture>>();
-      textures.push_back(std::shared_ptr<texture>(new sweetie_blue(ren_)));
-      textures.push_back(std::shared_ptr<texture>(new sweetie_green(ren_)));
-      textures.push_back(std::shared_ptr<texture>(new sweetie_purple(ren_)));
-      textures.push_back(std::shared_ptr<texture>(new sweetie_red(ren_)));
-      textures.push_back(std::shared_ptr<texture>(new sweetie_yellow(ren_)));
+      auto && sweets = std::vector<std::shared_ptr<sweetie>>();
+      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_blue(ren_)));
+      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_green(ren_)));
+      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_purple(ren_)));
+      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_red(ren_)));
+      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_yellow(ren_)));
 
       // The size of our sweeties are defined by this rectangle
       SDL_Rect tile_rect {0, 0, tile_size, tile_size};
 
       // to iterate throught the loaded textures so as to create a play area
-      auto itr = textures.end();
+      auto itr = sweets.end();
 
       // process the Y-axis
       for(auto y = 0 ; y < 8 ; ++y)
@@ -76,26 +76,26 @@ namespace sweetie_rush {
             for(;;)
             {
                // once we've worked our way though our list of textures...
-               if(itr == textures.end())
+               if(itr == sweets.end())
                {
                   // ...shuffle them up and start again
-                  std::random_shuffle(textures.begin(), textures.end());
-                  itr = textures.begin();
+                  std::random_shuffle(sweets.begin(), sweets.end());
+                  itr = sweets.begin();
 
                   // Note: The reason for the shuffling rather than just using
-                  // a randomised index into the vector of textures is to avoid
-                  // a situation where we have three textures in a row. In this
+                  // a randomised index into the vector of tiles is to avoid
+                  // a situation where we have three tiles in a row. In this
                   // case we need to pick a different texture, depending on how
                   // poor the random number generator is we could get stuck in
                   // a loop (possible, but unlikely infinate). By iterating a
-                  // list of random unique textures we are guaranteed that, at
-                  // most, we'll have to skip two textures. This is probably
+                  // list of random unique tiles we are guaranteed that, at
+                  // most, we'll have to skip two tiles. This is probably
                   // overkill, but I have worked on systems whose RNG was so
                   // bad they just repeatedly returned the same 4 numbers!!!
                }
 
                // assign our initial texture
-               tiles_[x][y] = *itr++;
+               tiles_[x][y] = tile(*itr++, &ren_, x, y);
 
                // now make sure we're not adding a 3rd to the X-axis
                if(x >= 2)
@@ -122,11 +122,6 @@ namespace sweetie_rush {
                // all good, break out of the try/repeat loop
                break;
             }
-
-            // copy the new texture into the render window
-            SDL_RenderCopy(
-               ren_.get(), tiles_[x][y]->get(),
-               nullptr, &tile_rect);
 
             tile_rect.x += 36;
          }
