@@ -53,6 +53,11 @@ namespace sweetie_rush {
          void render() const;
 
       public:
+
+         /**
+          * @brief Handles mouse click signals.
+          */
+
          void on_mouse_click();
 
       private:
