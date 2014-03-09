@@ -140,9 +140,30 @@ namespace sweetie_rush {
 
    void board::on_mouse_click(SDL_Event const & e)
    {
+      swipe_ok = true;
+
       if(e.button.button & SDL_BUTTON_LEFT)
       {
-         move_tile(e.button.x, e.button.y);
+         auto this_click = coords { e.button.x, e.button.y };
+
+         // get the position down to tile granularity
+         this_click.x /= tile_size;
+         this_click.y /= tile_size;
+
+         // Toggle select on this tile...
+         auto & this_tile = tiles_[this_click.x][this_click.y];
+         this_tile.toggle_selected();
+
+         if(this_tile.is_selected())
+         {
+            move_tile(this_click);
+         }
+         else
+         {
+            last_click_ = coords {-1, -1};
+         }
+
+         render();
       }
    }
 
@@ -150,58 +171,55 @@ namespace sweetie_rush {
    {
       if(e.motion.state & SDL_BUTTON_LEFT)
       {
-         move_tile(e.motion.x, e.motion.y);
+         auto this_click = coords { e.button.x, e.button.y };
+
+         // get the position down to tile granularity
+         this_click.x /= tile_size;
+         this_click.y /= tile_size;
+
+         if(swipe_ok)
+         {
+            move_tile(this_click);
+         }
+
+         render();
       }
    }
 
-   void board::move_tile(int x, int y)
+   void board::move_tile(coords const & this_click)
    {
-      auto this_click = coords {x, y};
-
-      // get the position down to tile granularity
-      this_click.x /= tile_size;
-      this_click.y /= tile_size;
-
-      // Toggle select on this tile...
       auto & this_tile = tiles_[this_click.x][this_click.y];
-      this_tile.toggle_selected();
 
-      if(this_tile.is_selected())
+      // if this click differs from the last...
+      if(this_click.x != last_click_.x || this_click.y != last_click_.y)
       {
-         // if this click differs from the last...
-         if(this_click.x != last_click_.x || this_click.y != last_click_.y)
+         // if we've perviously clicked a tile...
+         if(last_click_.x >= 0 && last_click_.y >= 0)
          {
-            // if we've perviously clicked a tile...
-            if(last_click_.x >= 0 && last_click_.y >= 0)
+            auto & last_tile = tiles_[last_click_.x][last_click_.y];
+
+            // get the x/y axis difference between this and last
+            auto const x_diff = abs(this_click.x-last_click_.x);
+            auto const y_diff = abs(this_click.y-last_click_.y);
+
+            // if this tile is adjacent vertically or horizontally
+            if((1 == x_diff && 1 != y_diff) ||
+               (1 != x_diff && 1 == y_diff))
             {
-               auto & last_tile = tiles_[last_click_.x][last_click_.y];
+               // swap the tiles
+               last_tile.swap(this_tile);
 
-               // get the x/y axis difference between this and last
-               auto const x_diff = abs(this_click.x-last_click_.x);
-               auto const y_diff = abs(this_click.y-last_click_.y);
-
-               // if this tile is adjacent vertically or horizontally
-               if((1 == x_diff && 1 != y_diff) ||
-                  (1 != x_diff && 1 == y_diff))
-               {
-                  // swap the tiles
-                  last_tile.swap(this_tile);
-               }
-
-               // look for any three-in-a-line match
-
-               // unselect the previous time
-               last_tile.selected(false);
+               // prevent more swiping until mouse unclicked
+               swipe_ok = false;
             }
 
-            last_click_ = this_click;
-         }
-      }
-      else
-      {
-         last_click_ = coords {-1, -1};
-      }
+            // look for any three-in-a-line match
 
-      render();
+            // unselect the previous time
+            last_tile.selected(false);
+         }
+
+         last_click_ = this_click;
+      }
    }
 }

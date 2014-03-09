@@ -39,8 +39,7 @@ namespace sweetie_rush {
             {
                brd_.on_mouse_click(e);
             }
-
-            if (e.type == SDL_MOUSEMOTION)
+            else if (e.type == SDL_MOUSEMOTION)
             {
                brd_.on_mouse_motion(e);
             }
