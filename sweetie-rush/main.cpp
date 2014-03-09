@@ -27,7 +27,24 @@ namespace sweetie_rush {
       sdl::construct_singleton();
       board brd;
 
-      std::this_thread::sleep_for( std::chrono::milliseconds( 20000 ));
+      auto && e = SDL_Event();
+      auto quit = false;
+
+      while (!quit)
+      {
+         while (SDL_PollEvent(&e))
+         {
+            if (e.type == SDL_QUIT)
+            {
+               quit = true;
+            }
+
+            if (e.type == SDL_MOUSEBUTTONDOWN)
+            {
+               brd.on_mouse_click();
+            }
+         }
+      }
    }
 }
 

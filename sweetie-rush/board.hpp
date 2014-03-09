@@ -51,6 +51,9 @@ namespace sweetie_rush {
 
          void render() const;
 
+      public:
+         void on_mouse_click();
+
       private:
          static int const tile_size = 36;
          static int const board_dim = 8;

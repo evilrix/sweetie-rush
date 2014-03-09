@@ -140,4 +140,17 @@ namespace sweetie_rush {
       // (re-)render the play area
       SDL_RenderPresent(ren_.get());
    }
+
+   void board::on_mouse_click()
+   {
+      auto x = int();
+      auto y = int();
+      auto z = SDL_GetMouseState(&x, &y);
+
+      if(z & SDL_BUTTON_LEFT)
+      {
+         x /= tile_size;
+         y /= tile_size;
+      }
+   }
 }
