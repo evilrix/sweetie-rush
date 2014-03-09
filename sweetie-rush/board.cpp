@@ -138,6 +138,20 @@ namespace sweetie_rush {
       SDL_RenderPresent(ren_.get());
    }
 
+   void board::score_move(coords const & this_click)
+   {
+      auto & this_tile = tiles_[this_click.x][this_click.y];
+      auto & last_tile = tiles_[last_click_.x][last_click_.y];
+
+      last_tile.selected(false);
+      this_tile.selected(false);
+
+      render();
+      SDL_Delay(500);
+
+      last_tile.swap(this_tile);
+   }
+
    void board::on_mouse_click(SDL_Event const & e)
    {
       swipe_ok = true;
@@ -154,9 +168,18 @@ namespace sweetie_rush {
          auto & this_tile = tiles_[this_click.x][this_click.y];
          this_tile.toggle_selected();
 
+         // If the current tile is selected we move it
          if(this_tile.is_selected())
          {
-            move_tile(this_click);
+            if(move_tile(this_click))
+            {
+               score_move(this_click);
+               last_click_ = coords {-1, -1};
+            }
+            else
+            {
+               last_click_ = this_click;
+            }
          }
          else
          {
@@ -179,15 +202,24 @@ namespace sweetie_rush {
 
          if(swipe_ok)
          {
-            move_tile(this_click);
+            if(move_tile(this_click))
+            {
+               score_move(this_click);
+               last_click_ = coords {-1, -1};
+            }
+            else
+            {
+               last_click_ = this_click;
+            }
          }
 
          render();
       }
    }
 
-   void board::move_tile(coords const & this_click)
+   bool board::move_tile(coords const & this_click)
    {
+      bool moved = false;
       auto & this_tile = tiles_[this_click.x][this_click.y];
 
       // if this click differs from the last...
@@ -208,6 +240,7 @@ namespace sweetie_rush {
             {
                // swap the tiles
                last_tile.swap(this_tile);
+               moved = true;
 
                // prevent more swiping until mouse unclicked
                swipe_ok = false;
@@ -218,8 +251,8 @@ namespace sweetie_rush {
             // unselect the previous time
             last_tile.selected(false);
          }
-
-         last_click_ = this_click;
       }
+
+      return moved;
    }
 }

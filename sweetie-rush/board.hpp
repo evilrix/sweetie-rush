@@ -76,7 +76,8 @@ namespace sweetie_rush {
          struct coords { int x; int y; };
 
       private:
-         void move_tile(coords const & this_click);
+         bool move_tile(coords const & this_click);
+         void score_move(coords const & this_click);
 
       private:
          window win_;
