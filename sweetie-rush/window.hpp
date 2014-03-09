@@ -5,12 +5,10 @@
 namespace sweetie_rush {
 
    class window :
-      public sdl_base<SDL_Window, SDL_DestroyWindow>
+      public sdl_base<SDL_Window>
    {
       public:
-         window(const char * title,
-                int x, int y, int w,
-                int h, Uint32 flags);
+         window(const char * title, int x, int y, int w, int h, Uint32 flags);
    };
 
 }

@@ -13,7 +13,7 @@
 namespace sweetie_rush {
 
    class texture :
-      public sdl_base<SDL_Texture, SDL_DestroyTexture>
+      public sdl_base<SDL_Texture>
    {
       public:
          texture(renderer const & ren, surface const & sur);

@@ -4,9 +4,8 @@
  * @brief Implements the main class.
  */
 
-#include <stdexcept>
+#include <ctime>
 #include <iostream>
-#include <string>
 
 #include <Windows.h>
 
@@ -14,10 +13,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "sdl.hpp"
-#include "window.hpp"
-#include "renderer.hpp"
-#include "surface.hpp"
-#include "texture.hpp"
+#include "board.hpp"
 #include "error.hpp"
 
 namespace sweetie_rush {
@@ -25,23 +21,7 @@ namespace sweetie_rush {
    void main()
    {
       sdl::construct_singleton();
-      auto && img = IMG_Load("assets/blue.png");
-
-      auto && win = window("Hello World!", 100, 100, 640, 480,
-                           SDL_WINDOW_SHOWN);
-
-      auto && ren = renderer(
-                       win, -1,
-                       SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-      auto && sur = surface("assets/blue.png");
-
-      auto && tex = texture(ren, sur);
-
-      SDL_RenderCopy(ren.get(), tex.get(), NULL, NULL);
-      SDL_RenderPresent(ren.get());
-
-      SDL_Delay(2000);
+      board brd;
    }
 }
 
@@ -78,6 +58,7 @@ int CALLBACK WinMain(
 
    try
    {
+      srand(static_cast<unsigned int>(time(0)));
       attach_console();
       sweetie_rush::main();
    }

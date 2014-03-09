@@ -64,7 +64,8 @@
       <AdditionalDependencies>SDL2.lib;SDL2_image.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)3rdparty\SDL2\lib\x86\*.dll" "$(OutDir)"</Command>
+      <Command>copy "$(SolutionDir)3rdparty\SDL2\lib\x86\*.dll" "$(OutDir)"
+copy "$(SolutionDir)assets\*.png" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -86,7 +87,8 @@
       <AdditionalDependencies>SDL2.lib;SDL2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)3rdparty\SDL2\lib\x86\*.dll" "$(OutDir)"</Command>
+      <Command>copy "$(SolutionDir)3rdparty\SDL2\lib\x86\*.dll" "$(OutDir)"
+copy "$(SolutionDir)assets\*.png" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -97,19 +99,23 @@
     <Image Include="..\assets\Yellow.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="board.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="sdl.cpp" />
     <ClCompile Include="surface.cpp" />
+    <ClCompile Include="sweetie.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="board.hpp" />
     <ClInclude Include="error.hpp" />
     <ClInclude Include="renderer.hpp" />
     <ClInclude Include="sdl.hpp" />
     <ClInclude Include="sdl_base.hpp" />
     <ClInclude Include="surface.hpp" />
+    <ClInclude Include="sweetie.hpp" />
     <ClInclude Include="texture.hpp" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>

@@ -10,10 +10,10 @@
 namespace sweetie_rush {
 
    texture::texture(renderer const & ren, surface const & sur)
-      : sdl_base(SDL_CreateTextureFromSurface(ren.get(), sur.get()))
+      : sdl_base(SDL_CreateTextureFromSurface(ren.get(), sur.get()),
+                 SDL_DestroyTexture)
    {
-      RuntimeError::ThrowOnNull(
-         get(), std::string("Unable to create texture")
-      );
+
    }
+
 }

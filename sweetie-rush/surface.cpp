@@ -12,10 +12,8 @@
 namespace sweetie_rush {
 
    surface::surface(std::string const & path)
-      : sdl_base(IMG_Load(path.c_str()))
+      : sdl_base(IMG_Load(path.c_str()), SDL_FreeSurface)
    {
-      RuntimeError::ThrowOnNull(
-         get(), "Unable to create surface: " + path
-      );
+
    }
 }

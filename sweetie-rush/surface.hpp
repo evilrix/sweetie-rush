@@ -13,7 +13,7 @@
 namespace sweetie_rush {
 
    class surface
-      : public sdl_base<SDL_Surface, SDL_FreeSurface>
+      : public sdl_base<SDL_Surface>
    {
       public:
          surface(std::string const & path);

@@ -6,25 +6,36 @@
 
 #pragma once
 
+#include <memory>
+#include <functional>
+
 #include <SDL2/SDL.h>
+
+#include "error.hpp"
 
 namespace sweetie_rush {
 
-   template<typename sdlT, void (*deleterT)(sdlT *)>
+   template<typename sdlT>
    class sdl_base
    {
       public:
-         using ptr_type = sdlT * ;
+         typedef sdlT value_type;
+         typedef value_type * ptr_type;
 
       public:
-         sdl_base(ptr_type raw) : ptr_(raw) {}
-         virtual ~sdl_base() { if(ptr_) { deleterT(ptr_); } };
+         sdl_base(ptr_type raw, std::function<void(ptr_type)> deleter)
+            : ptr_(raw, deleter)
+         {
+            RuntimeError::ThrowOnNull(get(), SDL_GetError());
+         }
+
+         virtual ~sdl_base() {};
 
       public:
-         ptr_type get() const { return ptr_; }
+         ptr_type get() const { return ptr_.get(); }
 
       private:
-         ptr_type ptr_;
+         std::shared_ptr<value_type> ptr_;
    };
 
 }
