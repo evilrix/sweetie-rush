@@ -1,8 +1,11 @@
-/**
- * @file window.cpp
- *
- * @brief Implements the window class.
- */
+/** vim: set ft=cpp ts=3 sw=3 tw=0 sts=0 et:
+  *
+  * @file   : sweetie-rush/window.cpp
+  * @author : evilrix
+  * @date   : 09/38/2014
+  * @brief  : Implements the window class
+  *
+  */
 
 #include "error.hpp"
 #include "window.hpp"

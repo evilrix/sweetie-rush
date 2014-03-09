@@ -1,8 +1,11 @@
-/**
- * @file board.hpp
- *
- * @brief Declares the board class.
- */
+/** vim: set ft=cpp ts=3 sw=3 tw=0 sts=0 et:
+  *
+  * @file   : sweetie-rush/board.hpp
+  * @author : evilrix
+  * @date   : 09/36/2014
+  * @brief  : Declares the board class
+  *
+  */
 
 #pragma once
 
@@ -14,15 +17,38 @@
 
 namespace sweetie_rush {
 
+   /**
+    * @brief Forward declare texture.
+    */
+
    class texture;
+
+   /**
+    * @brief A board.
+    */
 
    class board
    {
       public:
+
+         /**
+          * @brief Initializes a new instance of the board class.
+          */
+
          board();
 
       public:
+
+         /**
+          * @brief Initialises this board.
+          */
+
          void initialise();
+
+         /**
+          * @brief Renders this board.
+          */
+
          void render() const;
 
       private:

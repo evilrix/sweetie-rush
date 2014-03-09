@@ -1,11 +1,15 @@
-/**
- * @file main.cpp
- *
- * @brief Implements the main class.
- */
+/** vim: set ft=cpp ts=3 sw=3 tw=0 sts=0 et:
+  *
+  * @file   : sweetie-rush/main.cpp
+  * @author : evilrix
+  * @date   : 09/37/2014
+  * @brief  : Implements the main class
+  *
+  */
 
 #include <ctime>
 #include <iostream>
+#include <thread>
 
 #include <Windows.h>
 
@@ -22,6 +26,8 @@ namespace sweetie_rush {
    {
       sdl::construct_singleton();
       board brd;
+
+      std::this_thread::sleep_for( std::chrono::milliseconds( 20000 ));
    }
 }
 

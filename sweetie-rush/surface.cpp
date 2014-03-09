@@ -1,8 +1,11 @@
-/**
- * @file surface.cpp
- *
- * @brief Implements the surface class.
- */
+/** vim: set ft=cpp ts=3 sw=3 tw=0 sts=0 et:
+  *
+  * @file   : sweetie-rush/surface.cpp
+  * @author : evilrix
+  * @date   : 09/37/2014
+  * @brief  : Implements the surface class
+  *
+  */
 
 #include <SDL2/SDL_image.h>
 

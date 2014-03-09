@@ -1,8 +1,11 @@
-/**
- * @file sweetie.cpp
- *
- * @brief Implements the sweetie class.
- */
+/** vim: set ft=cpp ts=3 sw=3 tw=0 sts=0 et:
+  *
+  * @file   : sweetie-rush/sweetie.cpp
+  * @author : evilrix
+  * @date   : 09/37/2014
+  * @brief  : Implements the sweetie class
+  *
+  */
 
 #include "surface.hpp"
 #include "sweetie.hpp"
