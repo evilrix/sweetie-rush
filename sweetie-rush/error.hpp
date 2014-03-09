@@ -25,8 +25,6 @@ namespace sweetie_rush {
       /**
        * @brief Throw on true.
        *
-       * @exception exT Thrown when an ex t error condition occurs.
-       *
        * @param res The resource.
        * @param msg The message.
        */
@@ -70,5 +68,4 @@ namespace sweetie_rush {
    };
 
    using RuntimeError = error<std::runtime_error>;
-   using LogicError = error<std::logic_error>;
 }

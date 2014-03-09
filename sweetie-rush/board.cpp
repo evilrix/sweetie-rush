@@ -138,14 +138,19 @@ namespace sweetie_rush {
 
    void board::on_mouse_click()
    {
-      auto x = int();
-      auto y = int();
-      auto z = SDL_GetMouseState(&x, &y);
+      auto this_click = coords {};
+      auto z = SDL_GetMouseState(&this_click.x, &this_click.y);
 
       if(z & SDL_BUTTON_LEFT)
       {
-         x /= tile_size;
-         y /= tile_size;
+         this_click.x /= tile_size;
+         this_click.y /= tile_size;
+
+         tiles_[last_click_.x][last_click_.y].selected(false);
+         tiles_[this_click.x][this_click.y].selected(true);
+
+         last_click_ = this_click;
+         render();
       }
    }
 }

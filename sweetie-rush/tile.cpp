@@ -9,6 +9,7 @@
 
 #include <algorithm>
 
+#include "sdl_error.hpp"
 #include "tile.hpp"
 #include "sweetie.hpp"
 
@@ -17,8 +18,7 @@ namespace sweetie_rush {
    tile::tile(sweetie_ptr const & swt, renderer const * ren, int x, int y)
       : swt_(swt)
       , ren_(ren)
-      , x_(x)
-      , y_(y)
+      , rect_(SDL_Rect {x*dim, y*dim, dim, dim})
    {
       render_copy();
    }
@@ -44,10 +44,27 @@ namespace sweetie_rush {
    {
       if(ren_)
       {
-         SDL_Rect tile_rect {x_*dim, y_*dim, dim, dim};
-         SDL_RenderCopy(
-            ren_->get(), swt_->get(),
-            nullptr, &tile_rect);
+         SdlRuntimeError::ThrowOnFalse(
+            0 == SDL_SetRenderDrawColor(ren_->get(),
+                                        selected_ ? 0xFF : 0x00,
+                                        0x00,
+                                        0x00,
+                                        SDL_ALPHA_OPAQUE));
+
+         SdlRuntimeError::ThrowOnFalse(
+            0 == SDL_RenderFillRect(ren_->get(), &rect_));
+
+         SdlRuntimeError::ThrowOnFalse(
+            0 == SDL_RenderCopy(ren_->get(), swt_->get(), nullptr, &rect_));
+      }
+   }
+
+   void tile::selected(bool const selected)
+   {
+      if(selected_ != selected)
+      {
+         selected_ = selected;
+         render_copy();
       }
    }
 }

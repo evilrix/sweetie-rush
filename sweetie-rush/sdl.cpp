@@ -7,17 +7,14 @@
   *
   */
 
-#include "error.hpp"
+#include "sdl_error.hpp"
 #include "sdl.hpp"
 
 namespace sweetie_rush {
 
    sdl::sdl()
    {
-      RuntimeError::ThrowOnFalse(
-         0 == SDL_Init(SDL_INIT_EVERYTHING),
-         "Unable to initialise SDL"
-      );
+      SdlRuntimeError::ThrowOnFalse(0 == SDL_Init(SDL_INIT_EVERYTHING));
    }
 
    sdl::~sdl()

@@ -14,7 +14,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "error.hpp"
+#include "sdl_error.hpp"
 
 namespace sweetie_rush {
 
@@ -53,7 +53,7 @@ namespace sweetie_rush {
          sdl_base(ptr_type raw, std::function<void(ptr_type)> deleter)
             : ptr_(raw, deleter)
          {
-            RuntimeError::ThrowOnNull(get(), SDL_GetError());
+            SdlRuntimeError::ThrowOnNull(get());
          }
 
          /**

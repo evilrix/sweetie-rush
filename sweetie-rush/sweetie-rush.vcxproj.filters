@@ -91,5 +91,8 @@
     <ClInclude Include="tile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sdl_error.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

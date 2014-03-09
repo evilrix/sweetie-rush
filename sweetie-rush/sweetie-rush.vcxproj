@@ -115,6 +115,7 @@ copy "$(SolutionDir)assets\*.png" "$(OutDir)"</Command>
     <ClInclude Include="renderer.hpp" />
     <ClInclude Include="sdl.hpp" />
     <ClInclude Include="sdl_base.hpp" />
+    <ClInclude Include="sdl_error.hpp" />
     <ClInclude Include="surface.hpp" />
     <ClInclude Include="sweetie.hpp" />
     <ClInclude Include="texture.hpp" />

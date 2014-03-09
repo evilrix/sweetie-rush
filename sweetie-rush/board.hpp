@@ -67,11 +67,13 @@ namespace sweetie_rush {
 
       private:
          using types_t = std::array<std::array<tile, board_dim>, board_dim>;
+         struct coords { int x; int y; };
 
       private:
          window win_;
          renderer ren_;
          types_t tiles_;
+         coords last_click_ = coords {};
    };
 
 }

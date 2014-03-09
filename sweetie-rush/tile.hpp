@@ -70,14 +70,18 @@ namespace sweetie_rush {
          static
          void swap(tile & lhs, tile & rhs);
 
+      public:
+         void selected(bool const selected = true);
+
       private:
          void render_copy() const;
 
       private:
          sweetie_ptr swt_;
          renderer const * ren_ = nullptr;
-         int x_ = 0;
-         int y_ = 0;
+         SDL_Rect rect_ = SDL_Rect {0};
+         bool selected_ = false;
+
    };
 
 
