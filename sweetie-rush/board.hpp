@@ -73,11 +73,12 @@ namespace sweetie_rush {
 
       private:
          using types_t = std::array<std::array<tile, board_dim>, board_dim>;
-         struct coords { int x; int y; };
+         using coords = tile::coords;
 
       private:
          bool move_tile(coords const & this_click);
          void score_move(coords const & this_click);
+         bool handle_drop(tile * pt);
 
       private:
          window win_;
@@ -85,6 +86,7 @@ namespace sweetie_rush {
          types_t tiles_;
          coords last_click_ = coords {-1, -1};
          bool swipe_ok = true;
+         unsigned long score_ = 0;
    };
 
 }

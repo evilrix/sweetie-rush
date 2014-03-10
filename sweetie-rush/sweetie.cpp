@@ -11,7 +11,6 @@
 #include "sweetie.hpp"
 
 namespace sweetie_rush {
-
    template <>
    sweetie_<sweetie_enum::blue>::sweetie_(renderer const & ren)
       : sweetie(ren, surface("blue.png"))

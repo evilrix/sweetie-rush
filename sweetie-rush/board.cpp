@@ -138,6 +138,40 @@ namespace sweetie_rush {
       SDL_RenderPresent(ren_.get());
    }
 
+   bool board::handle_drop(tile * pt)
+   {
+      auto pcur = pt;
+
+      while(pcur->get_y() > 0 && *pcur == *pt)
+      {
+         pcur = &tiles_[pcur->get_x()][pcur->get_y()-1];
+      }
+
+      auto drop = ((pt->get_y() - pcur->get_y()) > 2);
+
+      if(drop)
+      {
+         while(pcur->get_y() >= 0)
+         {
+            pt->blank();
+            pt->swap(*pcur);
+
+            render();
+            SDL_Delay(500);
+
+            if(pcur->get_y() - 1 < 0)
+            {
+               break;
+            }
+
+            pt = &tiles_[pt->get_x()][pt->get_y()-1];
+            pcur = &tiles_[pcur->get_x()][pcur->get_y()-1];
+         }
+      }
+
+      return drop;
+   }
+
    void board::score_move(coords const & this_click)
    {
       auto & this_tile = tiles_[this_click.x][this_click.y];
@@ -146,10 +180,32 @@ namespace sweetie_rush {
       last_tile.selected(false);
       this_tile.selected(false);
 
+      tile * pt = &this_tile;
+      tile * pt_next = pt;
+
+      while(pt_next)
+      {
+         pt_next = pt->get_y() + 1 < board_dim
+                   ? &tiles_[pt->get_x()][pt->get_y() + 1] : nullptr;
+
+         if(pt_next && *pt_next != *pt)
+         {
+            pt_next = nullptr;
+         }
+
+         if(pt_next)
+         {
+            pt = pt_next;
+         }
+      }
+
+      if(!handle_drop(pt))
+      {
+         last_tile.swap(this_tile);
+      }
+
       render();
       SDL_Delay(500);
-
-      last_tile.swap(this_tile);
    }
 
    void board::on_mouse_click(SDL_Event const & e)

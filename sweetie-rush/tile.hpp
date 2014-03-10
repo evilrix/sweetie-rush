@@ -48,7 +48,17 @@ namespace sweetie_rush {
           * @return true if the parameters are considered equivalent.
           */
 
-         bool operator == (tile const & rhs);
+         bool operator == (tile const & rhs) const;
+
+         /*!
+          * \brief Inequality operator.
+          *
+          * \param rhs The right hand side.
+          *
+          * \return true if the parameters are not considered equivalent.
+          */
+
+         bool operator != (tile const & rhs) const;
 
          /**
           * @brief Member dereference operator.
@@ -99,13 +109,44 @@ namespace sweetie_rush {
 
          bool is_selected() const { return selected_; }
 
+         /*!
+          * \brief Get x coordinate.
+          *
+          * \return The x coordinate.
+          */
+
+         int get_x() const { return x_; }
+
+         /*!
+          * \brief Get y coordinate.
+          *
+          * \return The y coordinate.
+          */
+
+         int get_y() const { return y_; }
+
+         /*!
+          * \brief Blanks this tile.
+          */
+
+         void blank() { swt_.reset(); }
+
+      public:
+
+         /*!
+          * \brief X/Y coords.
+          */
+
+         struct coords { int x; int y; };
+
       private:
          void render_copy() const;
 
       private:
          sweetie_ptr swt_;
          renderer const * ren_ = nullptr;
-         SDL_Rect rect_ = SDL_Rect {0};
+         int x_ = -1;
+         int y_ = -1;
          bool selected_ = false;
 
    };

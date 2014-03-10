@@ -19,14 +19,21 @@ namespace sweetie_rush {
    tile::tile(sweetie_ptr const & swt, renderer const * ren, int x, int y)
       : swt_(swt)
       , ren_(ren)
-      , rect_(SDL_Rect {x*dim, y*dim, dim, dim})
+      , x_(x)
+      , y_(y)
+      , selected_(false)
    {
       render_copy();
    }
 
-   bool tile::operator == (tile const & rhs)
+   bool tile::operator == (tile const & rhs) const
    {
-      return swt_.get() == rhs.swt_.get();
+      return swt_->tag() == rhs.swt_->tag();
+   }
+
+   bool tile::operator != (tile const & rhs) const
+   {
+      return !(swt_->tag() == rhs.swt_->tag());
    }
 
    tile::sweetie_ptr tile::operator->() const
@@ -57,11 +64,16 @@ namespace sweetie_rush {
                                         0x00,
                                         SDL_ALPHA_OPAQUE));
 
-         SdlRuntimeError::ThrowOnFalse(
-            0 == SDL_RenderFillRect(ren_->get(), &rect_));
+         auto && rect = SDL_Rect {x_*dim, y_*dim, dim, dim};
 
          SdlRuntimeError::ThrowOnFalse(
-            0 == SDL_RenderCopy(ren_->get(), swt_->get(), nullptr, &rect_));
+            0 == SDL_RenderFillRect(ren_->get(), &rect));
+
+         if(swt_)
+         {
+            SdlRuntimeError::ThrowOnFalse(
+               0 == SDL_RenderCopy(ren_->get(), swt_->get(), nullptr, &rect));
+         }
       }
    }
 

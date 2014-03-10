@@ -26,6 +26,12 @@ namespace sweetie_rush {
 
          /**
           * @brief Initializes a new instance of the surface class.
+          */
+
+         surface() = default;
+
+         /**
+          * @brief Initializes a new instance of the surface class.
           *
           * @param path Full pathname of the file.
           */
