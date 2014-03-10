@@ -76,9 +76,12 @@ namespace sweetie_rush {
          using coords = tile::coords;
 
       private:
+         void fill_col(int x, int y, int pause = 250);
          bool move_tile(coords const & this_click);
-         void score_move(coords const & this_click);
-         bool handle_drop(tile * pt);
+         void clear_xy(coords const & this_click);
+         bool clear_x(coords const & this_click);
+         bool clear_y(coords const & this_click);
+         void handle_drop(tile * pt, tile * pcur);
 
       private:
          window win_;
