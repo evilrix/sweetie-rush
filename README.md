@@ -12,6 +12,7 @@ TODO:
 * The game-board code is a little hacky (it's still prototype/work in progress)
 * There are almost certainly still dragons in the matching code
 * The standard C++ code should be effcient, but the SDL code can probably be improved
+* No logic exists to enforce there'll always be a legal move
 
 Requirements:
 * Visual Studio 2013 (the code base is C++11 and won't build with older, non-standard versions)
