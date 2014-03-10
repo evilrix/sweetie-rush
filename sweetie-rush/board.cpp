@@ -19,6 +19,10 @@ namespace sweetie_rush {
 
    auto const delay = 100; ///< Delay in ms for sweetie animation
 
+   /*!
+    * \brief Initializes a new instance of the board class.
+    */
+
    board::board()
       : win_(window("Sweetie Rush!",
                     SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED,
@@ -47,6 +51,8 @@ namespace sweetie_rush {
     *
     * \param x The x coordinate.
     * \param y The y coordinate.
+    *
+    * Fills the y-axis, starting from position y until full
     */
 
    void board::fill_col(int x, int y)
@@ -92,7 +98,7 @@ namespace sweetie_rush {
             // assign our initial texture
             tiles_[x][y] = tile(*itr++, &ren_, x, y);
 
-            // now make sure we're not adding a 3rd to the X-axis
+            // now make sure we're not adding a 3rd matching to the X-axis
             if(x >= 2)
             {
                if(tiles_[x][y] == tiles_[x-1][y] &&
@@ -114,6 +120,7 @@ namespace sweetie_rush {
                }
             }
 
+            // update the board
             render();
 
             // all good, break out of the try/repeat loop
@@ -128,7 +135,7 @@ namespace sweetie_rush {
 
    void board::initialise()
    {
-      // process the Y-axis
+      // for each column, fill it
       for(auto x = 0 ; x < board_dim ; ++x)
       {
          fill_col(x, board_dim-1);
@@ -154,10 +161,13 @@ namespace sweetie_rush {
     *
     * Swaps out current tile for the next real tile above it, moving all times
     * down to fille the gaps and then adding new tiles to the column.
+    *
+    * TODO: as things drop they might create more matches so we should handle
     */
 
    void board::handle_drop(tile * pt, tile * pcur)
    {
+      // firstly, remove matches and compact the space
       while(pcur->get_y() >= 0)
       {
          pt->blank();
@@ -174,6 +184,7 @@ namespace sweetie_rush {
          pcur = &tiles_[pcur->get_x()][pcur->get_y()-1];
       }
 
+      // then fill the rest of the column with new sweeties
       if(pt->get_y() >= 0)
       {
          fill_col(pt->get_x(), pt->get_y());
@@ -190,12 +201,8 @@ namespace sweetie_rush {
 
    bool board::clear_y(coords const & this_click)
    {
+      // find the start of the y-axis run
       auto & this_tile = tiles_[this_click.x][this_click.y];
-      auto & last_tile = tiles_[last_click_.x][last_click_.y];
-
-      last_tile.selected(false);
-      this_tile.selected(false);
-
       tile * pt = &this_tile;
       tile * pt_next = pt;
 
@@ -215,6 +222,7 @@ namespace sweetie_rush {
          }
       }
 
+      // find the end of the y-axis run
       auto pcur = pt;
 
       while(pcur->get_y() > 0 && *pcur == *pt)
@@ -222,8 +230,10 @@ namespace sweetie_rush {
          pcur = &tiles_[pcur->get_x()][pcur->get_y()-1];
       }
 
+      // do we have 3 or more in a row?
       auto drop = ((pt->get_y() - pcur->get_y()) >= 2);
 
+      // remove the matches
       if(drop)
       {
          handle_drop(pt, pcur);
@@ -242,6 +252,7 @@ namespace sweetie_rush {
 
    bool board::clear_x(coords const & this_click)
    {
+      // find the start of the x-axis run
       auto & this_tile = tiles_[this_click.x][this_click.y];
 
       tile * pt = &this_tile;
@@ -263,6 +274,7 @@ namespace sweetie_rush {
          }
       }
 
+      // find the end of the x-axis run
       auto pcur = pt;
 
       while(pcur->get_x() > 0)
@@ -274,31 +286,40 @@ namespace sweetie_rush {
          pcur = tmp;
       }
 
+      // do we have 3 or more in a row?
       auto drop = ((pt->get_x() - pcur->get_x()) >= 2);
 
+      // remove the candiate matches
       if(drop)
       {
+         // for each item on the x-axis we remove we do an y-axis drop
          do
          {
             bool cleared = false;
 
+            // if the current x-axis we're going to clear is also the tie
+            // clicked we also want to check and clear the y-axis
             if(pcur == &this_tile)
             {
                cleared = clear_y(this_click);
             }
 
+            // if we removed nothing from the y-axis
             if(!cleared)
             {
+               // if this is the last row just add new
                if(pcur->get_y() == 0)
                {
                   fill_col(pcur->get_x(), pcur->get_y());
                }
+               // else, clear and compact matches
                else
                {
                   handle_drop(pcur, &tiles_[pcur->get_x()][pcur->get_y()-1]);
                }
             }
 
+            // if we have more on the x-axis, process them
             if(pcur->get_x() < board_dim - 1)
             {
                pcur = &tiles_[pcur->get_x()+1][pcur->get_y()];
@@ -306,12 +327,15 @@ namespace sweetie_rush {
          }
          while(pcur->get_x() < (board_dim-1) && pcur->get_x() <= pt->get_x());
       }
+      // there were no x-axis candidates, so just clean the y-axis
       else
       {
+         // clean what was clicked
          drop = clear_y(this_click);
 
          if(!drop || this_click.y != last_click_.y)
          {
+            // clean the other tile, too
             drop = drop || clear_y(last_click_);
          }
       }
@@ -383,11 +407,13 @@ namespace sweetie_rush {
          // If the current tile is selected we move it
          if(this_tile.is_selected())
          {
+            // if we moved tiles try cleaning matches
             if(move_tile(this_click))
             {
                clear_xy(this_click);
                last_click_ = coords {-1, -1};
             }
+            // no tile toggle this time, remember this tile just clicked
             else
             {
                last_click_ = this_click;
@@ -395,9 +421,11 @@ namespace sweetie_rush {
          }
          else
          {
+            // no tiles selected, unset last click state
             last_click_ = coords {-1, -1};
          }
 
+         // redraw board
          render();
       }
    }
@@ -418,8 +446,10 @@ namespace sweetie_rush {
          this_click.x /= tile_size;
          this_click.y /= tile_size;
 
+         // if swipes are allowed
          if(swipe_ok)
          {
+            // handle moving tiles
             if(move_tile(this_click))
             {
                clear_xy(this_click);
