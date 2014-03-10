@@ -16,6 +16,15 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief Initializes a new instance of the tile class.
+    *
+    * \param swt The swt.
+    * \param ren The ren.
+    * \param x   The x coordinate.
+    * \param y   The y coordinate.
+    */
+
    tile::tile(sweetie_ptr const & swt, renderer const * ren, int x, int y)
       : swt_(swt)
       , ren_(ren)
@@ -26,20 +35,48 @@ namespace sweetie_rush {
       render_copy();
    }
 
+   /*!
+    * \brief Equality operator.
+    *
+    * \param rhs The right hand side.
+    *
+    * \return true if the parameters are considered equivalent.
+    */
+
    bool tile::operator == (tile const & rhs) const
    {
       return swt_->tag() == rhs.swt_->tag();
    }
+
+   /*!
+    * \brief Inequality operator.
+    *
+    * \param rhs The right hand side.
+    *
+    * \return true if the parameters are not considered equivalent.
+    */
 
    bool tile::operator != (tile const & rhs) const
    {
       return !(swt_->tag() == rhs.swt_->tag());
    }
 
+   /*!
+    * \brief Member dereference operator.
+    *
+    * \return The dereferenced object.
+    */
+
    tile::sweetie_ptr tile::operator->() const
    {
       return swt_;
    }
+
+   /*!
+    * \brief Swaps the given right hand side.
+    *
+    * \param [in,out] rhs The right hand side.
+    */
 
    void tile::swap(tile & rhs)
    {
@@ -48,10 +85,21 @@ namespace sweetie_rush {
       rhs.render_copy();
    }
 
+   /*!
+    * \brief Swaps.
+    *
+    * \param [in,out] lhs The left hand side.
+    * \param [in,out] rhs The right hand side.
+    */
+
    void tile::swap(tile & lhs, tile & rhs)
    {
       lhs.swt_.swap(rhs.swt_);
    }
+
+   /*!
+    * \brief Renders the copy.
+    */
 
    void tile::render_copy() const
    {
@@ -77,6 +125,12 @@ namespace sweetie_rush {
       }
    }
 
+   /*!
+    * \brief Selected the given selected.
+    *
+    * \param selected The selected.
+    */
+
    void tile::selected(bool const selected)
    {
       if(selected_ != selected)
@@ -85,6 +139,10 @@ namespace sweetie_rush {
          render_copy();
       }
    }
+
+   /*!
+    * \brief Toggle selected.
+    */
 
    void tile::toggle_selected()
    {

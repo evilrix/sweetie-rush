@@ -78,7 +78,7 @@ namespace sweetie_rush {
 
       private:
          void fill_col(int x, int y);
-         bool move_tile(coords const & this_click);
+         bool toggle_tiles(coords const & this_click);
          void clear_xy(coords const & this_click);
          bool clear_x(coords const & this_click);
          bool clear_y(coords const & this_click);

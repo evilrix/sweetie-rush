@@ -11,6 +11,14 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief Initializes a new instance of the renderer class.
+    *
+    * \param win   The window.
+    * \param index Zero-based index of the.
+    * \param flags The flags.
+    */
+
    renderer::renderer(window const & win, int index, Uint32 flags)
       : sdl_base(SDL_CreateRenderer(win.get(), index,flags),
                  SDL_DestroyRenderer)

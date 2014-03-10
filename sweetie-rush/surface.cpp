@@ -14,6 +14,12 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief Initializes a new instance of the surface class.
+    *
+    * \param path Full pathname of the file.
+    */
+
    surface::surface(std::string const & path)
       : sdl_base(IMG_Load(path.c_str()), SDL_FreeSurface)
    {

@@ -16,11 +16,19 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief Main entry-point for this application.
+    */
+
    void main()
    {
       game().run();
    }
 }
+
+/*!
+ * \brief Attach console.
+ */
 
 void attach_console()
 {
@@ -43,6 +51,16 @@ void attach_console()
    }
 }
 
+/*!
+ * \brief Window main.
+ *
+ * \param parameter1 The first parameter.
+ * \param parameter2 The second parameter.
+ * \param parameter3 The third parameter.
+ * \param parameter4 The fourth parameter.
+ *
+ * \return A CALLBACK.
+ */
 
 int CALLBACK WinMain(
    HINSTANCE /* hInstance */,

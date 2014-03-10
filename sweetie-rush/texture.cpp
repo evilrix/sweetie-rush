@@ -12,6 +12,13 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief Initializes a new instance of the texture class.
+    *
+    * \param ren The ren.
+    * \param sur The sur.
+    */
+
    texture::texture(renderer const & ren, surface const & sur)
       : sdl_base(SDL_CreateTextureFromSurface(ren.get(), sur.get()),
                  SDL_DestroyTexture)

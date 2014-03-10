@@ -330,14 +330,17 @@ namespace sweetie_rush {
       // there were no x-axis candidates, so just clean the y-axis
       else
       {
-         // clean what was clicked
-         drop = clear_y(this_click);
+         coords p1 = this_click;
+         coords p2 = last_click_;
 
-         if(!drop || this_click.y != last_click_.y)
+         if(p1.x < p2.x)
          {
-            // clean the other tile, too
-            drop = drop || clear_y(last_click_);
+            std::swap(p1, p2);
          }
+
+         // clean what was clicked
+         drop = clear_y(p1);
+         drop = clear_y(p2) || drop;
       }
 
       return drop;
@@ -351,6 +354,7 @@ namespace sweetie_rush {
 
    void board::clear_xy(coords const & this_click)
    {
+
       // get this tile and the last tile clicked
       auto & this_tile = tiles_[this_click.x][this_click.y];
       auto & last_tile = tiles_[last_click_.x][last_click_.y];
@@ -359,14 +363,17 @@ namespace sweetie_rush {
       last_tile.selected(false);
       this_tile.selected(false);
 
-      // look for and file matches for clicked tile
-      auto match = clear_x(this_click);
+      coords p1 = this_click;
+      coords p2 = last_click_;
 
-      if(!match || this_click.x != last_click_.x)
+      if(p1.y > p2.y)
       {
-         // look for and file matches for other tile
-         match = match || clear_x(last_click_);
+         std::swap(p1, p2);
       }
+
+      // look for and file matches for clicked tile
+      auto match = clear_x(p1);
+      match = clear_x(p2) || match;
 
       // did we file any matches?
       if(!match)
@@ -408,7 +415,7 @@ namespace sweetie_rush {
          if(this_tile.is_selected())
          {
             // if we moved tiles try cleaning matches
-            if(move_tile(this_click))
+            if(toggle_tiles(this_click))
             {
                clear_xy(this_click);
                last_click_ = coords {-1, -1};
@@ -450,7 +457,7 @@ namespace sweetie_rush {
          if(swipe_ok)
          {
             // handle moving tiles
-            if(move_tile(this_click))
+            if(toggle_tiles(this_click))
             {
                clear_xy(this_click);
                last_click_ = coords {-1, -1};
@@ -473,7 +480,7 @@ namespace sweetie_rush {
     * \return true if it succeeds, false if it fails.
     */
 
-   bool board::move_tile(coords const & this_click)
+   bool board::toggle_tiles(coords const & this_click)
    {
       bool moved = false;
       auto & this_tile = tiles_[this_click.x][this_click.y];

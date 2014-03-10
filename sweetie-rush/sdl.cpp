@@ -12,15 +12,29 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief Initializes a new instance of the sdl class.
+    */
+
    sdl::sdl()
    {
       SdlRuntimeError::ThrowOnFalse(0 == SDL_Init(SDL_INIT_EVERYTHING));
    }
 
+   /*!
+    * \brief Finalizes an instance of the sdl class.
+    */
+
    sdl::~sdl()
    {
       SDL_Quit();
    }
+
+   /*!
+    * \brief Initializes this sdl.
+    *
+    * \return A const&amp;
+    */
 
    sdl const & sdl::initialize()
    {

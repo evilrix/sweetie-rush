@@ -16,10 +16,18 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief Initializes a new instance of the game class.
+    */
+
    game::game()
    {
       srand(static_cast<unsigned int>(time(0)));
    }
+
+   /*!
+    * \brief Runs this game.
+    */
 
    void game::run()
    {
