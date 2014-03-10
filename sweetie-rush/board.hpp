@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <array>
+#include <vector>
 
 #include "window.hpp"
 #include "renderer.hpp"
@@ -76,7 +77,7 @@ namespace sweetie_rush {
          using coords = tile::coords;
 
       private:
-         void fill_col(int x, int y, int pause = 250);
+         void fill_col(int x, int y);
          bool move_tile(coords const & this_click);
          void clear_xy(coords const & this_click);
          bool clear_x(coords const & this_click);
@@ -89,7 +90,7 @@ namespace sweetie_rush {
          types_t tiles_;
          coords last_click_ = coords {-1, -1};
          bool swipe_ok = true;
-         unsigned long score_ = 0;
+         std::vector<std::shared_ptr<sweetie>> sweets_;
    };
 
 }

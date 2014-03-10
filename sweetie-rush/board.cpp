@@ -11,12 +11,13 @@
 #include <utility>
 #include <algorithm>
 #include <memory>
-#include <vector>
 
 #include "sweetie.hpp"
 #include "board.hpp"
 
 namespace sweetie_rush {
+
+   auto const delay = 100; ///< Delay in ms for sweetie animation
 
    board::board()
       : win_(window("Sweetie Rush!",
@@ -27,6 +28,13 @@ namespace sweetie_rush {
                 win_, -1,
                 SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))
    {
+      // Our sweeties, cached - used to repaint the board
+      sweets_.push_back(std::shared_ptr<sweetie>(new sweetie_blue(ren_)));
+      sweets_.push_back(std::shared_ptr<sweetie>(new sweetie_green(ren_)));
+      sweets_.push_back(std::shared_ptr<sweetie>(new sweetie_purple(ren_)));
+      sweets_.push_back(std::shared_ptr<sweetie>(new sweetie_red(ren_)));
+      sweets_.push_back(std::shared_ptr<sweetie>(new sweetie_yellow(ren_)));
+
       // initialise the play aread
       initialise();
 
@@ -41,21 +49,13 @@ namespace sweetie_rush {
     * \param y The y coordinate.
     */
 
-   void board::fill_col(int x, int y, int pause)
+   void board::fill_col(int x, int y)
    {
-      // Due to a bug in VS2013 we can't use C++11 init-lists and shared_ptr!
-      auto && sweets = std::vector<std::shared_ptr<sweetie>>();
-      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_blue(ren_)));
-      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_green(ren_)));
-      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_purple(ren_)));
-      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_red(ren_)));
-      sweets.push_back(std::shared_ptr<sweetie>(new sweetie_yellow(ren_)));
-
       // The size of our sweeties are defined by this rectangle
       SDL_Rect tile_rect {x*36, y*36, tile_size, tile_size};
 
       // to iterate throught the loaded textures so as to create a play area
-      auto itr = sweets.end();
+      auto itr = sweets_.end();
 
       // process the y-axis
       for(; y >= 0 ; --y)
@@ -71,11 +71,11 @@ namespace sweetie_rush {
          for(;;)
          {
             // once we've worked our way though our list of textures...
-            if(itr == sweets.end())
+            if(itr == sweets_.end())
             {
                // ...shuffle them up and start again
-               std::random_shuffle(sweets.begin(), sweets.end());
-               itr = sweets.begin();
+               std::random_shuffle(sweets_.begin(), sweets_.end());
+               itr = sweets_.begin();
 
                // Note: The reason for the shuffling rather than just using
                // a randomised index into the vector of tiles is to avoid
@@ -115,7 +115,6 @@ namespace sweetie_rush {
             }
 
             render();
-            SDL_Delay(pause);
 
             // all good, break out of the try/repeat loop
             break;
@@ -132,15 +131,30 @@ namespace sweetie_rush {
       // process the Y-axis
       for(auto x = 0 ; x < board_dim ; ++x)
       {
-         fill_col(x, board_dim-1, 0);
+         fill_col(x, board_dim-1);
       }
    }
+
+   /*!
+    * \brief Renders this board.
+    */
 
    void board::render() const
    {
       // (re-)render the play area
       SDL_RenderPresent(ren_.get());
+      SDL_Delay(delay);
    }
+
+   /*!
+    * \brief Handles the drops.
+    *
+    * \param [in,out] pt   If non-null, the point.
+    * \param [in,out] pcur If non-null, the pcur.
+    *
+    * Swaps out current tile for the next real tile above it, moving all times
+    * down to fille the gaps and then adding new tiles to the column.
+    */
 
    void board::handle_drop(tile * pt, tile * pcur)
    {
@@ -150,7 +164,6 @@ namespace sweetie_rush {
          pt->swap(*pcur);
 
          render();
-         SDL_Delay(250);
 
          if(pcur->get_y() - 1 < 0)
          {
@@ -166,6 +179,14 @@ namespace sweetie_rush {
          fill_col(pt->get_x(), pt->get_y());
       }
    }
+
+   /*!
+    * \brief Clears the y-axis of matches.
+    *
+    * \param this_click this clicked tile.
+    *
+    * \return true if it succeeds, false if it fails.
+    */
 
    bool board::clear_y(coords const & this_click)
    {
@@ -211,13 +232,17 @@ namespace sweetie_rush {
       return drop;
    }
 
+   /*!
+    * \brief Clears the x-axis of matches.
+    *
+    * \param this_click this clicked tile.
+    *
+    * \return true if it succeeds, false if it fails.
+    */
+
    bool board::clear_x(coords const & this_click)
    {
       auto & this_tile = tiles_[this_click.x][this_click.y];
-      auto & last_tile = tiles_[last_click_.x][last_click_.y];
-
-      last_tile.selected(false);
-      this_tile.selected(false);
 
       tile * pt = &this_tile;
       tile * pt_next = pt;
@@ -284,26 +309,60 @@ namespace sweetie_rush {
       else
       {
          drop = clear_y(this_click);
+
+         if(!drop || this_click.y != last_click_.y)
+         {
+            drop = drop || clear_y(last_click_);
+         }
       }
 
       return drop;
    }
 
+   /*!
+    * \brief Clears the xy-axis of matches.
+    *
+    * \param this_click this clicked tile.
+    */
+
    void board::clear_xy(coords const & this_click)
    {
-      auto const moved = clear_x(this_click);
+      // get this tile and the last tile clicked
+      auto & this_tile = tiles_[this_click.x][this_click.y];
+      auto & last_tile = tiles_[last_click_.x][last_click_.y];
 
-      if(!moved)
+      // clear selections on both tiles
+      last_tile.selected(false);
+      this_tile.selected(false);
+
+      // look for and file matches for clicked tile
+      auto match = clear_x(this_click);
+
+      if(!match || this_click.x != last_click_.x)
       {
+         // look for and file matches for other tile
+         match = match || clear_x(last_click_);
+      }
+
+      // did we file any matches?
+      if(!match)
+      {
+         //...nope, so swap tiles back again
          auto & this_tile = tiles_[this_click.x][this_click.y];
          auto & last_tile = tiles_[last_click_.x][last_click_.y];
 
          last_tile.swap(this_tile);
       }
 
+      // render the board
       render();
-      SDL_Delay(250);
    }
+
+   /*!
+    * \brief Handles mouse click signals.
+    *
+    * \param e The SDL_Event const &amp; to process.
+    */
 
    void board::on_mouse_click(SDL_Event const & e)
    {
@@ -343,6 +402,12 @@ namespace sweetie_rush {
       }
    }
 
+   /*!
+    * \brief Handles mouse motion signals.
+    *
+    * \param e The SDL_Event const &amp; to process.
+    */
+
    void board::on_mouse_motion(SDL_Event const & e)
    {
       if(e.motion.state & SDL_BUTTON_LEFT)
@@ -369,6 +434,14 @@ namespace sweetie_rush {
          render();
       }
    }
+
+   /*!
+    * \brief Move tile.
+    *
+    * \param this_click this click.
+    *
+    * \return true if it succeeds, false if it fails.
+    */
 
    bool board::move_tile(coords const & this_click)
    {
@@ -399,18 +472,13 @@ namespace sweetie_rush {
                swipe_ok = false;
             }
 
-            // look for any three-in-a-line match
-
-            // unselect the previous time
+            // unselect the previous tile
             last_tile.selected(false);
          }
       }
 
-      if(moved)
-      {
-         render();
-         SDL_Delay(250);
-      }
+      // render any changes to the board
+      render();
 
       return moved;
    }
