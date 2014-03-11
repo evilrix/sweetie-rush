@@ -155,11 +155,21 @@ namespace sweetie_rush {
       selected(!selected_);
    }
 
+   /*!
+    * \brief Clears this tile to its blank/initial state.
+    */
+
    void tile::clear()
    {
       swt_.reset();
       render_copy();
    }
+
+   /*!
+    * \brief Query if this tile is clear.
+    *
+    * \return true if clear, false if not.
+    */
 
    bool tile::is_clear() const
    {

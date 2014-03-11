@@ -18,6 +18,23 @@
 namespace sweetie_rush {
 
    /*!
+    * \brief Callback, called when the quit.
+    *
+    * \param interval            The interval.
+    * \param [in,out] parameter2 Unused.
+    *
+    * \return An Uint32.
+    */
+
+   Uint32 quit_callback(Uint32 interval, void * /* param */)
+   {
+      SDL_Event event;
+      event.type = SDL_QUIT;
+      SDL_PushEvent(&event);
+      return interval;
+   }
+
+   /*!
     * \brief Initializes a new instance of the board class.
     */
 
@@ -42,19 +59,25 @@ namespace sweetie_rush {
 
       // render the play area
       render();
+
+      // start the game's timer set for 1 minute
+      SdlRuntimeError::ThrowOnTrue(
+         0 == SDL_AddTimer(60*1000, quit_callback, nullptr));
    }
 
    /*!
-    * \brief Fill col.
+    * \brief Fill column
     *
-    * \param x The x coordinate.
-    * \param y The y coordinate.
-    *
-    * Fills the y-axis, starting from position y until full
+    * \param x     The x coordinate.
+    * \param y     The y coordinate.
+    * \param pause The pause.
     */
 
-   void board::fill_col(int x, int y, bool const pause)
+   void board::fill_col(tile::coords const & ords, bool const pause)
    {
+      int const x = ords.x;
+      int y = ords.y;
+
       // The size of our sweeties are defined by this rectangle
       SDL_Rect tile_rect {x*36, y*36, tile_size, tile_size};
 
@@ -139,7 +162,7 @@ namespace sweetie_rush {
       // for each column, fill it
       for(auto x = 0 ; x < board_dim ; ++x)
       {
-         fill_col(x, board_dim-1, false);
+         fill_col(tile::coords(x, board_dim-1), false);
       }
    }
 
@@ -164,6 +187,8 @@ namespace sweetie_rush {
 
    bool board::scan_for_matches(std::set<tile *> & matches)
    {
+      // Scans both the verticle and horizontal axis' of the board and finds
+      // all matches. These are put into a set for processing, later.
       for(auto o = 0 ; o < board_dim ; ++o)
       {
          auto last_x = 0;
@@ -171,11 +196,11 @@ namespace sweetie_rush {
 
          for(auto i = 0 ; i <= board_dim ; ++i)
          {
-            if(i == board_dim || tiles_[o][i] != tiles_[o][last_x])
+            if(i == board_dim || tiles_[o][i] != tiles_[o][last_y])
             {
-               if(i - last_x >2)
+               if(i - last_y >2)
                {
-                  for(auto z = last_x ; z < i ; ++z)
+                  for(auto z = last_y ; z < i ; ++z)
                   {
                      if(!tiles_[o][z].is_clear())
                      {
@@ -184,14 +209,14 @@ namespace sweetie_rush {
                   }
                }
 
-               last_x = i;
+               last_y = i;
             }
 
-            if(i == board_dim || tiles_[i][o] != tiles_[last_y][o])
+            if(i == board_dim || tiles_[i][o] != tiles_[last_x][o])
             {
-               if(i - last_y >2)
+               if(i - last_x >2)
                {
-                  for(auto z = last_y ; z < i ; ++z)
+                  for(auto z = last_x ; z < i ; ++z)
                   {
                      if(!tiles_[o][z].is_clear())
                      {
@@ -200,7 +225,7 @@ namespace sweetie_rush {
                   }
                }
 
-               last_y = i;
+               last_x = i;
             }
          }
       }
@@ -208,14 +233,20 @@ namespace sweetie_rush {
       return !matches.empty();
    }
 
-   void board::rebuild_col(int x)
+   /*!
+    * \brief Rebuild the column.
+    *
+    * \param x The x coordinate.
+    */
+
+   void board::rebuild_col(tile::coords const & ords)
    {
-      auto tort = 7;
-      auto hare = 7;
+      auto tort = ords.y;
+      auto hare = ords.y;
 
       while(hare > 0)
       {
-         while(tort > 0 && !tiles_[x][tort].is_clear())
+         while(tort > 0 && !tiles_[ords.x][tort].is_clear())
          {
             if(hare > --tort)
             {
@@ -223,68 +254,107 @@ namespace sweetie_rush {
             }
          }
 
-         while(hare >= 0 && tiles_[x][hare].is_clear())
+         while(hare >= 0 && tiles_[ords.x][hare].is_clear())
          {
             --hare;
          }
 
-         if(hare >= 0 && !tiles_[x][hare].is_clear())
+         if(hare >= 0 && !tiles_[ords.x][hare].is_clear())
          {
-            tiles_[x][tort--].swap(tiles_[x][hare]);
+            tiles_[ords.x][tort--].swap(tiles_[ords.x][hare]);
             render();
          }
       }
 
-      fill_col(x, tort);
+      fill_col(tile::coords(ords.x, tort));
    }
+
+   /*!
+    * \brief Handles the matches described by matches.
+    *
+    * \param [in,out] matches [in,out] If non-null, the matches.
+    */
 
    void board::handle_matches(std::set<tile *> & matches)
    {
-      std::set<int> xs;
+      // a known bug in VS2013 means you can't pass a lambda as a predicate to
+      // an STL container unless it captures something. Here we're capturing
+      // matches just to stop the false compile time error we'd get otherwise.
+      auto sort_pred = [&matches](
+                          tile::coords const & L,
+                          tile::coords const & R
+      ) { return L.x < R.x; };
 
-      // Clear the matches whilst building a list of columns to rebuild
+      // a list of columns to rebuild
+      std::set<tile::coords, decltype(sort_pred)> ords(sort_pred);
+
+      // for each match
       for(auto & match : matches)
       {
-         auto itr = xs.find(match->get_x());
+         // Have we already seen this column?
+         // The idea, here, is that we only want to rebuild a column once so
+         // if we have more than one match in a column we want to find the one
+         // that has the highest row number. We only need rebuilt the row from
+         // that point upwards.
+         auto && ord = tile::coords(match->get_x(), match->get_y());
+         auto itr = ords.find(ord);
 
-         if(itr != xs.end())
+         if(itr != ords.end())
          {
-            if(*itr < match->get_y())
+            // if we're seen it is this row lower than the previous
+            if(itr->y < match->get_y())
             {
-               xs.erase(itr);
-               itr = xs.end();
+               // yes it is, so we'll swap it out.
+               ords.erase(itr);
+               itr = ords.end();
             }
          }
 
-         if(itr == xs.end())
+         // insert the new row for this column
+         if(itr == ords.end())
          {
-            xs.insert(match->get_x());
+            ords.insert(ord);
          }
 
+         // clear the current match tile (make it blank)
          match->clear();
       }
 
       render();
 
-      for(auto x : xs)
+      // rebuild the columns for the matches found
+      for(auto const & ord : ords)
       {
-         rebuild_col(x);
+         rebuild_col(ord);
       }
    }
+
+   /*!
+    * \brief Searches for the first matches.
+    *
+    * \return true if it succeeds, false if it fails.
+    */
 
    bool board::find_matches()
    {
       auto found = false;
       std::set<tile *> matches;
 
+      // scan for matches
       while(scan_for_matches(matches))
       {
+         // since one set of matches can create more we re-scan over and over
+         // until we find no more mathes
          if(!matches.empty())
          {
             found = true;
             handle_matches(matches);
+
+            // scoring is a simple case of accumulating the matches
+            score_ += matches.size();
          }
 
+         // clear this match set in readiness to scan again
          matches.clear();
       }
 
@@ -419,6 +489,7 @@ namespace sweetie_rush {
       // render any changes to the board
       render();
 
+      // if we didn't toggle just records this click
       if(!toggled)
       {
          last_click_ = this_click;

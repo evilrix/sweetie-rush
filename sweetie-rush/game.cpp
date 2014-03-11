@@ -9,6 +9,9 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <string>
+
+#include <windows.h>
 
 #include <SDL2/SDL.h>
 
@@ -26,10 +29,12 @@ namespace sweetie_rush {
    }
 
    /*!
-    * \brief Runs this game.
+    * \brief Gets the run.
+    *
+    * \return A size_t The final score.
     */
 
-   void game::run()
+   size_t game::run()
    {
       auto && e = SDL_Event();
       auto quit = false;
@@ -38,15 +43,17 @@ namespace sweetie_rush {
       {
          while (SDL_PollEvent(&e))
          {
+            // quit request
             if (e.type == SDL_QUIT)
             {
                quit = true;
             }
-
-            if (e.type == SDL_MOUSEBUTTONDOWN)
+            // user is clicking the mouse
+            else if (e.type == SDL_MOUSEBUTTONDOWN)
             {
                brd_.on_mouse_click(e);
             }
+            // user is moving the mouse
             else if (e.type == SDL_MOUSEMOTION)
             {
                brd_.on_mouse_motion(e);
@@ -54,6 +61,7 @@ namespace sweetie_rush {
          }
       }
 
+      return brd_.get_score();
    }
 
 }

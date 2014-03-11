@@ -29,11 +29,13 @@ namespace sweetie_rush {
 
       public:
 
-         /**
-          * @brief Runs this game.
+         /*!
+          * \brief Gets the run.
+          *
+          * \return A size_t The users score.
           */
 
-         void run();
+         size_t run();
 
       private:
          board brd_;

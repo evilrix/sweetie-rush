@@ -9,6 +9,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <sstream>
 
 #include <Windows.h>
 
@@ -22,7 +23,24 @@ namespace sweetie_rush {
 
    void main()
    {
-      game().run();
+      // keep looping until the user gets bored of playing
+
+      while(true)
+      {
+         auto const score = game().run();
+
+         std::ostringstream oss;
+
+         oss
+               << "Score: " << score << "\r\n"
+               << "Would you like to play again?";
+
+         if(IDYES != MessageBox(
+               nullptr, oss.str().c_str(), "Game over", MB_YESNO))
+         {
+            break;
+         }
+      }
    }
 }
 
@@ -34,6 +52,7 @@ void attach_console()
 {
    bool attached = AttachConsole(ATTACH_PARENT_PROCESS) != 0;
 
+   // Only force attach when running a debug build
 #if !defined(NDEBUG)
 
    if (!attached)
@@ -43,6 +62,10 @@ void attach_console()
 
 #endif
 
+   // re-open standard file streams.
+   // Note, that due to a known bug in the Windows CRT these streams cannot
+   // be redirected on the command line using the > operator. This is a known
+   // bug in the Windows CRT and is NOT a defect of this application!
    if (attached)
    {
       freopen("CON", "w", stdout);
@@ -69,13 +92,15 @@ int CALLBACK WinMain(
    int /* nCmdShow */
 )
 {
-   int exitCode = 0;
+   int exitCode = 1; // start off assuming an error
 
+   // trap and report all exceptions
    try
    {
       srand(static_cast<unsigned int>(time(0)));
       attach_console();
       sweetie_rush::main();
+      exitCode = 0; // good, no errors :)
    }
    catch(std::exception const & e)
    {

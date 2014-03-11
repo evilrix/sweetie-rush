@@ -28,7 +28,17 @@ namespace sweetie_rush {
          static sdl const & initialize();
 
       private:
+
+         /*!
+          * \brief Initializes a new instance of the sdl class.
+          */
+
          sdl();
+
+         /*!
+          * \brief Finalizes an instance of the sdl class.
+          */
+
          ~sdl();
 
       private:

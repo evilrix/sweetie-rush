@@ -13,6 +13,10 @@
 
 namespace sweetie_rush {
 
+   /*!
+    * \brief A tile.
+    */
+
    class tile
    {
       public:
