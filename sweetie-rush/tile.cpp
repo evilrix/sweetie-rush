@@ -45,6 +45,11 @@ namespace sweetie_rush {
 
    bool tile::operator == (tile const & rhs) const
    {
+      if(!swt_ || !rhs.swt_)
+      {
+         return false;
+      }
+
       return swt_->tag() == rhs.swt_->tag();
    }
 
@@ -58,7 +63,8 @@ namespace sweetie_rush {
 
    bool tile::operator != (tile const & rhs) const
    {
-      return !(swt_->tag() == rhs.swt_->tag());
+
+      return !(*this == rhs);
    }
 
    /*!
@@ -147,5 +153,16 @@ namespace sweetie_rush {
    void tile::toggle_selected()
    {
       selected(!selected_);
+   }
+
+   void tile::clear()
+   {
+      swt_.reset();
+      render_copy();
+   }
+
+   bool tile::is_clear() const
+   {
+      return swt_ == nullptr;
    }
 }

@@ -129,7 +129,15 @@ namespace sweetie_rush {
           * \brief Blanks this tile.
           */
 
-         void blank() { swt_.reset(); }
+         void clear();
+
+         /*!
+          * \brief Query if this tile is clear.
+          *
+          * \return true if clear, false if not.
+          */
+
+         bool tile::is_clear() const;
 
       public:
 
@@ -137,7 +145,25 @@ namespace sweetie_rush {
           * \brief X/Y coords.
           */
 
-         struct coords { int x; int y; };
+         struct coords
+         {
+            int x = -1;
+            int y = -1;
+
+            coords() = default;
+
+            coords(int x, int y) : x(x), y(y) {}
+
+            bool operator == (coords const & rhs) const
+            {
+               return x == rhs.x && y == rhs.y;
+            }
+
+            bool operator != (coords const & rhs) const
+            {
+               return !(*this == rhs);
+            }
+         };
 
       private:
          void render_copy() const;

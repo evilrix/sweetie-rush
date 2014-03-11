@@ -12,6 +12,7 @@
 #include <memory>
 #include <array>
 #include <vector>
+#include <set>
 
 #include "window.hpp"
 #include "renderer.hpp"
@@ -47,11 +48,13 @@ namespace sweetie_rush {
 
          void initialise();
 
-         /**
-          * @brief Renders this board.
+         /*!
+          * \brief Renders the given pause.
+          *
+          * \param pause (Optional) the pause.
           */
 
-         void render() const;
+         void render(bool const delay = true) const;
 
       public:
 
@@ -74,21 +77,20 @@ namespace sweetie_rush {
 
       private:
          using types_t = std::array<std::array<tile, board_dim>, board_dim>;
-         using coords = tile::coords;
 
       private:
-         void fill_col(int x, int y);
-         bool toggle_tiles(coords const & this_click);
-         void clear_xy(coords const & this_click);
-         bool clear_x(coords const & this_click);
-         bool clear_y(coords const & this_click);
-         void handle_drop(tile * pt, tile * pcur);
+         void fill_col(int x, int y, bool const pause = true);
+         void rebuild_col(int x);
+         bool toggle_tiles(tile::coords const & this_click);
+         bool find_matches();
+         bool scan_for_matches(std::set<tile *> & matches);
+         void handle_matches(std::set<tile *> & matches);
 
       private:
          window win_;
          renderer ren_;
          types_t tiles_;
-         coords last_click_ = coords {-1, -1};
+         tile::coords last_click_;
          bool swipe_ok = true;
          std::vector<std::shared_ptr<sweetie>> sweets_;
    };

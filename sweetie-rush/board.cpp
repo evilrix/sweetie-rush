@@ -17,8 +17,6 @@
 
 namespace sweetie_rush {
 
-   auto const delay = 100; ///< Delay in ms for sweetie animation
-
    /*!
     * \brief Initializes a new instance of the board class.
     */
@@ -55,7 +53,7 @@ namespace sweetie_rush {
     * Fills the y-axis, starting from position y until full
     */
 
-   void board::fill_col(int x, int y)
+   void board::fill_col(int x, int y, bool const pause)
    {
       // The size of our sweeties are defined by this rectangle
       SDL_Rect tile_rect {x*36, y*36, tile_size, tile_size};
@@ -121,7 +119,10 @@ namespace sweetie_rush {
             }
 
             // update the board
-            render();
+            if(pause)
+            {
+               render(pause);
+            }
 
             // all good, break out of the try/repeat loop
             break;
@@ -138,7 +139,7 @@ namespace sweetie_rush {
       // for each column, fill it
       for(auto x = 0 ; x < board_dim ; ++x)
       {
-         fill_col(x, board_dim-1);
+         fill_col(x, board_dim-1, false);
       }
    }
 
@@ -146,249 +147,149 @@ namespace sweetie_rush {
     * \brief Renders this board.
     */
 
-   void board::render() const
+   void board::render(bool const delay) const
    {
       // (re-)render the play area
       SDL_RenderPresent(ren_.get());
-      SDL_Delay(delay);
-   }
 
-   /*!
-    * \brief Handles the drops.
-    *
-    * \param [in,out] pt   If non-null, the point.
-    * \param [in,out] pcur If non-null, the pcur.
-    *
-    * Swaps out current tile for the next real tile above it, moving all times
-    * down to fille the gaps and then adding new tiles to the column.
-    *
-    * TODO: as things drop they might create more matches so we should handle
-    */
-
-   void board::handle_drop(tile * pt, tile * pcur)
-   {
-      // firstly, remove matches and compact the space
-      while(pcur->get_y() >= 0)
+      if(delay)
       {
-         pt->blank();
-         pt->swap(*pcur);
-
-         render();
-
-         if(pcur->get_y() - 1 < 0)
-         {
-            break;
-         }
-
-         pt = &tiles_[pt->get_x()][pt->get_y()-1];
-         pcur = &tiles_[pcur->get_x()][pcur->get_y()-1];
-      }
-
-      // then fill the rest of the column with new sweeties
-      if(pt->get_y() >= 0)
-      {
-         fill_col(pt->get_x(), pt->get_y());
+         SDL_Delay(50);
       }
    }
 
    /*!
-    * \brief Clears the y-axis of matches.
-    *
-    * \param this_click this clicked tile.
-    *
-    * \return true if it succeeds, false if it fails.
+    * \brief Scans for matches.
     */
 
-   bool board::clear_y(coords const & this_click)
+   bool board::scan_for_matches(std::set<tile *> & matches)
    {
-      // find the start of the y-axis run
-      auto & this_tile = tiles_[this_click.x][this_click.y];
-      tile * pt = &this_tile;
-      tile * pt_next = pt;
-
-      while(pt_next)
+      for(auto o = 0 ; o < board_dim ; ++o)
       {
-         pt_next = pt->get_y() + 1 < board_dim
-                   ? &tiles_[pt->get_x()][pt->get_y() + 1] : nullptr;
+         auto last_x = 0;
+         auto last_y = 0;
 
-         if(pt_next && *pt_next != *pt)
+         for(auto i = 0 ; i <= board_dim ; ++i)
          {
-            pt_next = nullptr;
-         }
-
-         if(pt_next)
-         {
-            pt = pt_next;
-         }
-      }
-
-      // find the end of the y-axis run
-      auto pcur = pt;
-
-      while(pcur->get_y() > 0 && *pcur == *pt)
-      {
-         pcur = &tiles_[pcur->get_x()][pcur->get_y()-1];
-      }
-
-      // do we have 3 or more in a row?
-      auto drop = ((pt->get_y() - pcur->get_y()) >= 2);
-
-      // remove the matches
-      if(drop)
-      {
-         handle_drop(pt, pcur);
-      }
-
-      return drop;
-   }
-
-   /*!
-    * \brief Clears the x-axis of matches.
-    *
-    * \param this_click this clicked tile.
-    *
-    * \return true if it succeeds, false if it fails.
-    */
-
-   bool board::clear_x(coords const & this_click)
-   {
-      // find the start of the x-axis run
-      auto & this_tile = tiles_[this_click.x][this_click.y];
-
-      tile * pt = &this_tile;
-      tile * pt_next = pt;
-
-      while(pt_next)
-      {
-         pt_next = pt->get_x() + 1 < board_dim
-                   ? &tiles_[pt->get_x() + 1][pt->get_y()] : nullptr;
-
-         if(pt_next && *pt_next != *pt)
-         {
-            pt_next = nullptr;
-         }
-
-         if(pt_next)
-         {
-            pt = pt_next;
-         }
-      }
-
-      // find the end of the x-axis run
-      auto pcur = pt;
-
-      while(pcur->get_x() > 0)
-      {
-         auto tmp = &tiles_[pcur->get_x()-1][pcur->get_y()];
-
-         if(*tmp != *pcur) { break; }
-
-         pcur = tmp;
-      }
-
-      // do we have 3 or more in a row?
-      auto drop = ((pt->get_x() - pcur->get_x()) >= 2);
-
-      // remove the candiate matches
-      if(drop)
-      {
-         // for each item on the x-axis we remove we do an y-axis drop
-         do
-         {
-            bool cleared = false;
-
-            // if the current x-axis we're going to clear is also the tie
-            // clicked we also want to check and clear the y-axis
-            if(pcur == &this_tile)
+            if(i == board_dim || tiles_[o][i] != tiles_[o][last_x])
             {
-               cleared = clear_y(this_click);
-            }
-
-            // if we removed nothing from the y-axis
-            if(!cleared)
-            {
-               // if this is the last row just add new
-               if(pcur->get_y() == 0)
+               if(i - last_x >2)
                {
-                  fill_col(pcur->get_x(), pcur->get_y());
+                  for(auto z = last_x ; z < i ; ++z)
+                  {
+                     if(!tiles_[o][z].is_clear())
+                     {
+                        matches.insert(&tiles_[o][z]);
+                     }
+                  }
                }
-               // else, clear and compact matches
-               else
-               {
-                  handle_drop(pcur, &tiles_[pcur->get_x()][pcur->get_y()-1]);
-               }
+
+               last_x = i;
             }
 
-            // if we have more on the x-axis, process them
-            if(pcur->get_x() < board_dim - 1)
+            if(i == board_dim || tiles_[i][o] != tiles_[last_y][o])
             {
-               pcur = &tiles_[pcur->get_x()+1][pcur->get_y()];
+               if(i - last_y >2)
+               {
+                  for(auto z = last_y ; z < i ; ++z)
+                  {
+                     if(!tiles_[o][z].is_clear())
+                     {
+                        matches.insert(&tiles_[z][o]);
+                     }
+                  }
+               }
+
+               last_y = i;
             }
          }
-         while(pcur->get_x() < (board_dim-1) && pcur->get_x() <= pt->get_x());
-      }
-      // there were no x-axis candidates, so just clean the y-axis
-      else
-      {
-         coords p1 = this_click;
-         coords p2 = last_click_;
-
-         if(p1.x < p2.x)
-         {
-            std::swap(p1, p2);
-         }
-
-         // clean what was clicked
-         drop = clear_y(p1);
-         drop = clear_y(p2) || drop;
       }
 
-      return drop;
+      return !matches.empty();
    }
 
-   /*!
-    * \brief Clears the xy-axis of matches.
-    *
-    * \param this_click this clicked tile.
-    */
-
-   void board::clear_xy(coords const & this_click)
+   void board::rebuild_col(int x)
    {
+      auto tort = 7;
+      auto hare = 7;
 
-      // get this tile and the last tile clicked
-      auto & this_tile = tiles_[this_click.x][this_click.y];
-      auto & last_tile = tiles_[last_click_.x][last_click_.y];
-
-      // clear selections on both tiles
-      last_tile.selected(false);
-      this_tile.selected(false);
-
-      coords p1 = this_click;
-      coords p2 = last_click_;
-
-      if(p1.y > p2.y)
+      while(hare > 0)
       {
-         std::swap(p1, p2);
+         while(tort > 0 && !tiles_[x][tort].is_clear())
+         {
+            if(hare > --tort)
+            {
+               hare = tort;
+            }
+         }
+
+         while(hare >= 0 && tiles_[x][hare].is_clear())
+         {
+            --hare;
+         }
+
+         if(hare >= 0 && !tiles_[x][hare].is_clear())
+         {
+            tiles_[x][tort--].swap(tiles_[x][hare]);
+            render();
+         }
       }
 
-      // look for and file matches for clicked tile
-      auto match = clear_x(p1);
-      match = clear_x(p2) || match;
+      fill_col(x, tort);
+   }
 
-      // did we file any matches?
-      if(!match)
+   void board::handle_matches(std::set<tile *> & matches)
+   {
+      std::set<int> xs;
+
+      // Clear the matches whilst building a list of columns to rebuild
+      for(auto & match : matches)
       {
-         //...nope, so swap tiles back again
-         auto & this_tile = tiles_[this_click.x][this_click.y];
-         auto & last_tile = tiles_[last_click_.x][last_click_.y];
+         auto itr = xs.find(match->get_x());
 
-         last_tile.swap(this_tile);
+         if(itr != xs.end())
+         {
+            if(*itr < match->get_y())
+            {
+               xs.erase(itr);
+               itr = xs.end();
+            }
+         }
+
+         if(itr == xs.end())
+         {
+            xs.insert(match->get_x());
+         }
+
+         match->clear();
       }
 
-      // render the board
       render();
+
+      for(auto x : xs)
+      {
+         rebuild_col(x);
+      }
    }
 
+   bool board::find_matches()
+   {
+      auto found = false;
+      std::set<tile *> matches;
+
+      while(scan_for_matches(matches))
+      {
+         if(!matches.empty())
+         {
+            found = true;
+            handle_matches(matches);
+         }
+
+         matches.clear();
+      }
+
+      return found;
+   }
    /*!
     * \brief Handles mouse click signals.
     *
@@ -401,7 +302,7 @@ namespace sweetie_rush {
 
       if(e.button.button & SDL_BUTTON_LEFT)
       {
-         auto this_click = coords { e.button.x, e.button.y };
+         auto this_click = tile::coords ( e.button.x, e.button.y );
 
          // get the position down to tile granularity
          this_click.x /= tile_size;
@@ -417,19 +318,18 @@ namespace sweetie_rush {
             // if we moved tiles try cleaning matches
             if(toggle_tiles(this_click))
             {
-               clear_xy(this_click);
-               last_click_ = coords {-1, -1};
-            }
-            // no tile toggle this time, remember this tile just clicked
-            else
-            {
-               last_click_ = this_click;
+               if(!find_matches())
+               {
+                  toggle_tiles(this_click);
+               }
+
+               last_click_ = tile::coords();
             }
          }
          else
          {
             // no tiles selected, unset last click state
-            last_click_ = coords {-1, -1};
+            last_click_ = tile::coords();
          }
 
          // redraw board
@@ -447,7 +347,7 @@ namespace sweetie_rush {
    {
       if(e.motion.state & SDL_BUTTON_LEFT)
       {
-         auto this_click = coords { e.button.x, e.button.y };
+         auto this_click = tile::coords(e.button.x, e.button.y);
 
          // get the position down to tile granularity
          this_click.x /= tile_size;
@@ -459,12 +359,12 @@ namespace sweetie_rush {
             // handle moving tiles
             if(toggle_tiles(this_click))
             {
-               clear_xy(this_click);
-               last_click_ = coords {-1, -1};
-            }
-            else
-            {
-               last_click_ = this_click;
+               if(!find_matches())
+               {
+                  toggle_tiles(this_click);
+               }
+
+               last_click_ = tile::coords();
             }
          }
 
@@ -480,43 +380,50 @@ namespace sweetie_rush {
     * \return true if it succeeds, false if it fails.
     */
 
-   bool board::toggle_tiles(coords const & this_click)
+   bool board::toggle_tiles(tile::coords const & this_click)
    {
-      bool moved = false;
+      bool toggled = false;
       auto & this_tile = tiles_[this_click.x][this_click.y];
 
-      // if this click differs from the last...
-      if(this_click.x != last_click_.x || this_click.y != last_click_.y)
+      this_tile.selected(true);
+
+      // no previous tile clicked, so just save this click and return
+      if(!(last_click_.x < 0 || last_click_.y < 0))
       {
-         // if we've perviously clicked a tile...
-         if(last_click_.x >= 0 && last_click_.y >= 0)
+         auto & last_tile = tiles_[last_click_.x][last_click_.y];
+         last_tile.selected(false);
+
+         // if this click differs from the last...
+         if(this_click != last_click_)
          {
-            auto & last_tile = tiles_[last_click_.x][last_click_.y];
 
             // get the x/y axis difference between this and last
             auto const x_diff = abs(this_click.x-last_click_.x);
             auto const y_diff = abs(this_click.y-last_click_.y);
 
             // if this tile is adjacent vertically or horizontally
-            if((1 == x_diff && 1 != y_diff) ||
-               (1 != x_diff && 1 == y_diff))
+            if((1 == x_diff && 0 == y_diff) ||
+               (0 == x_diff && 1 == y_diff))
             {
                // swap the tiles
                last_tile.swap(this_tile);
-               moved = true;
+               this_tile.selected(false);
+               toggled = true;
 
                // prevent more swiping until mouse unclicked
                swipe_ok = false;
             }
-
-            // unselect the previous tile
-            last_tile.selected(false);
          }
       }
 
       // render any changes to the board
       render();
 
-      return moved;
+      if(!toggled)
+      {
+         last_click_ = this_click;
+      }
+
+      return toggled;
    }
 }
