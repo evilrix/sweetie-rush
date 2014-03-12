@@ -84,11 +84,11 @@ namespace sweetie_rush {
          /*!
           * \brief Fill col.
           *
-          * \param ords  The ords.
-          * \param pause (Optional) the pause.
+          * \param ords    The ords.
+          * \param animate (Optional) the animate.
           */
 
-         void fill_col(tile::coords const & ords, bool const pause = true);
+         void fill_col(tile::coords const & ords, bool const animate = true);
 
          /*!
           * \brief Rebuild col.

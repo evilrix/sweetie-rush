@@ -57,23 +57,19 @@ namespace sweetie_rush {
       // initialise the play aread
       initialise();
 
-      // render the play area
-      render();
-
       // start the game's timer set for 1 minute
       SdlRuntimeError::ThrowOnTrue(
          0 == SDL_AddTimer(60*1000, quit_callback, nullptr));
    }
 
    /*!
-    * \brief Fill column
+    * \brief Fill col.
     *
-    * \param x     The x coordinate.
-    * \param y     The y coordinate.
-    * \param pause The pause.
+    * \param ords    The ords.
+    * \param animate The animate.
     */
 
-   void board::fill_col(tile::coords const & ords, bool const pause)
+   void board::fill_col(tile::coords const & ords, bool const animate)
    {
       int const x = ords.x;
       int y = ords.y;
@@ -141,15 +137,20 @@ namespace sweetie_rush {
                }
             }
 
-            // update the board
-            if(pause)
+            // animate filling the board?
+            if(animate)
             {
-               render(pause);
+               render();
             }
 
             // all good, break out of the try/repeat loop
             break;
          }
+      }
+
+      if(!animate)
+      {
+         render(false);
       }
    }
 
@@ -164,6 +165,9 @@ namespace sweetie_rush {
       {
          fill_col(tile::coords(x, board_dim-1), false);
       }
+
+      // render the play area
+      render();
    }
 
    /*!
