@@ -27,6 +27,12 @@ namespace sweetie_rush {
       yellow
    };
 
+   /*!
+    * \brief A sweetie.
+    *
+    * \sa texture
+    */
+
    class sweetie : public texture
    {
       public:
